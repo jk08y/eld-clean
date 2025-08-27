@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
 
 const ProductCard = ({ product }) => {
+  const imageUrl = (product.imageUrls && product.imageUrls[0]) || 'https://placehold.co/400x400/F1F5F9/374151?text=Eld+Clean';
+
   return (
     <div className="bg-white border border-base-300 rounded-lg shadow-sm overflow-hidden group transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
       <Link to={`/products/${product.id}`} className="block">
         <div className="relative">
           <img 
-            src={product.imageUrl || 'https://placehold.co/400x400/F1F5F9/374151?text=Eld+Clean'} 
+            src={imageUrl} 
             alt={product.name}
             className="w-full h-56 object-cover"
             onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/400x400/cccccc/ffffff?text=Image+Not+Found'; }}

@@ -21,10 +21,8 @@ import OrdersPage from './pages/user/OrdersPage';
 import CheckoutPage from './pages/checkout/CheckoutPage';
 import OrderConfirmationPage from './pages/checkout/OrderConfirmationPage';
 import AdminDashboard from './pages/Admin/AdminDashboard';
-
-// Placeholder components for other pages
-const AdminProducts = () => <div className="text-center"><h1>Manage Products</h1></div>;
-const AdminOrders = () => <div className="text-center"><h1>Manage Orders</h1></div>;
+import AdminProducts from './pages/Admin/AdminProducts';
+import AdminOrders from './pages/Admin/AdminOrders';
 
 // Component to handle the main layout for non-admin pages
 const MainLayout = () => (
