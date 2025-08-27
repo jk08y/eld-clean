@@ -1,17 +1,26 @@
 import React, { useState } from 'react';
 import { ShoppingCart, Minus, Plus } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const ProductInfo = ({ product }) => {
   const [quantity, setQuantity] = useState(1);
   const { addItemToCart } = useCart();
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const handleQuantityChange = (amount) => {
     setQuantity(prev => Math.max(1, prev + amount));
   };
 
   const handleAddToCart = () => {
-    // This logic would be expanded to handle adding a specific quantity
+    if (!currentUser) {
+      navigate('/login', { state: { from: location } });
+      return;
+    }
+    // This logic can be improved to add a specific quantity at once
     for (let i = 0; i < quantity; i++) {
       addItemToCart(product);
     }

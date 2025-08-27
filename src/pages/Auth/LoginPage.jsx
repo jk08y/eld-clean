@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import AuthLayout from '../../components/Auth/AuthLayout';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
@@ -11,6 +11,10 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const { logIn, googleSignIn } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Determine where to redirect after login
+  const from = location.state?.from?.pathname || '/';
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -22,10 +26,9 @@ const LoginPage = () => {
     try {
       await logIn(formData.email, formData.password);
       toast.success('Signed in successfully!');
-      navigate('/');
+      navigate(from, { replace: true });
     } catch (error) {
       toast.error(error.message || 'Failed to sign in.');
-      console.error(error);
     }
     setLoading(false);
   };
@@ -34,10 +37,9 @@ const LoginPage = () => {
     try {
       await googleSignIn();
       toast.success('Signed in with Google successfully!');
-      navigate('/');
+      navigate(from, { replace: true });
     } catch (error) {
       toast.error(error.message || 'Failed to sign in with Google.');
-      console.error(error);
     }
   };
 

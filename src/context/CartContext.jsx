@@ -35,10 +35,7 @@ export const CartProvider = ({ children }) => {
   }, [fetchCart]);
 
   const addItemToCart = async (product) => {
-    if (!currentUser) {
-      toast.error("Please log in to add items to your cart.");
-      return;
-    }
+    // The check for currentUser is now handled in the component before calling this
     const toastId = toast.loading("Adding to cart...");
     try {
       await cartService.addToCart(currentUser.uid, product);
