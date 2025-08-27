@@ -1,0 +1,74 @@
+# --------------------------------
+# Node.js / JavaScript Projects
+# --------------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+.pnpm-debug.log*
+
+# --------------------------------
+# Build / Output
+# --------------------------------
+dist/
+build/
+.cache/
+.vite/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+
+# --------------------------------
+# Environment & Config
+# --------------------------------
+.env
+.env.*
+!.env.example   # keep example env for reference
+
+# --------------------------------
+# OS Generated Files
+# --------------------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+Desktop.ini
+
+# --------------------------------
+# IDE / Editor Configs
+# --------------------------------
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.iml
+
+# --------------------------------
+# Logs & Temp Files
+# --------------------------------
+logs
+*.log
+*.tmp
+*.temp
+*.bak
+*.pid
+*.seed
+*.pid.lock
+
+# --------------------------------
+# Miscellaneous
+# --------------------------------
+*.tgz
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# lock files created by editors
+*.lock
