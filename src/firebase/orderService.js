@@ -1,5 +1,5 @@
 import { db } from './config';
-import { collection, getDocs, doc, updateDoc, query, where, addDoc, serverTimestamp, getDoc, limit } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, query, where, addDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 
 const ordersCollectionRef = collection(db, 'orders');
 
@@ -7,12 +7,23 @@ export const createOrder = async (orderData) => {
   // Create an array of just the product IDs for easier querying later
   const productIds = orderData.items.map(item => item.productId);
   
-  return await addDoc(ordersCollectionRef, {
+  const orderRef = await addDoc(ordersCollectionRef, {
     ...orderData,
-    productIds, // Add the new field
+    productIds,
     status: 'Processing',
     createdAt: serverTimestamp(),
   });
+
+  // After order is created, save shipping address to user profile if it doesn't exist
+  const userDocRef = doc(db, 'users', orderData.userId);
+  const userDoc = await getDoc(userDocRef);
+  if (userDoc.exists() && !userDoc.data().shippingAddress) {
+    await updateDoc(userDocRef, {
+      shippingAddress: orderData.shippingAddress
+    });
+  }
+
+  return orderRef;
 };
 
 export const checkIfUserPurchasedProduct = async (userId, productId) => {
@@ -21,7 +32,7 @@ export const checkIfUserPurchasedProduct = async (userId, productId) => {
     ordersCollectionRef, 
     where("userId", "==", userId), 
     where("productIds", "array-contains", productId),
-    limit(1) // We only need to know if at least one exists
+    limit(1)
   );
   const querySnapshot = await getDocs(q);
   return !querySnapshot.empty;

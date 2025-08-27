@@ -24,11 +24,14 @@ const CheckoutPage = () => {
 
   useEffect(() => {
     if (currentUser) {
-      setShippingData(prev => ({
-        ...prev,
+      // Pre-fill with saved shipping address if it exists, otherwise just the name
+      const savedAddress = currentUser.shippingAddress;
+      setShippingData({
         fullName: currentUser.fullName || '',
-        // You can add address fields to the user profile later
-      }));
+        address: savedAddress?.address || '',
+        city: savedAddress?.city || '',
+        county: savedAddress?.county || '',
+      });
     }
   }, [currentUser]);
 

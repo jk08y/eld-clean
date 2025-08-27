@@ -6,6 +6,7 @@ import 'react-phone-number-input/style.css'
 import PhoneInput from 'react-phone-number-input'
 import toast from 'react-hot-toast';
 import { User, ShoppingBag, LogOut } from 'lucide-react';
+import ConfirmationModal from '../../components/Layout/ConfirmationModal';
 
 const ProfilePage = () => {
   const { currentUser, logOut, updateUserProfile } = useAuth();
@@ -17,6 +18,8 @@ const ProfilePage = () => {
 
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
+  
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   useEffect(() => {
     if (currentUser) {
@@ -84,10 +87,6 @@ const ProfilePage = () => {
             <ShoppingBag size={20} />
             <span>My Orders</span>
           </button>
-          <button onClick={logOut} className="w-full flex items-center space-x-3 p-3 rounded-md text-left text-neutral/80 hover:bg-gray-100 transition-colors">
-            <LogOut size={20} />
-            <span>Log Out</span>
-          </button>
         </nav>
       </div>
     </aside>
@@ -109,9 +108,13 @@ const ProfilePage = () => {
           <label htmlFor="phone" className="block text-sm font-medium text-neutral">Phone Number</label>
           <PhoneInput id="phone" international defaultCountry="KE" value={phone} onChange={setPhone} className="mt-1 w-full border border-base-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
         </div>
-        <div className="pt-2">
-          <button type="submit" disabled={loading} className="bg-primary text-white font-bold py-2 px-6 rounded-full hover:bg-primary/90 transition-colors duration-300 disabled:bg-primary/50">
+        <div className="flex flex-col sm:flex-row items-center justify-between pt-4 border-t mt-6">
+          <button type="submit" disabled={loading} className="bg-primary text-white font-bold py-2 px-6 rounded-full hover:bg-primary/90 transition-colors duration-300 disabled:bg-primary/50 mb-4 sm:mb-0 w-full sm:w-auto">
             {loading ? 'Saving...' : 'Save Changes'}
+          </button>
+          <button type="button" onClick={() => setIsLogoutModalOpen(true)} className="w-full sm:w-auto flex items-center justify-center space-x-2 text-red-600 font-semibold py-2 px-4 rounded-full hover:bg-red-50 transition-colors">
+            <LogOut size={18} />
+            <span>Log Out</span>
           </button>
         </div>
       </form>
@@ -148,15 +151,24 @@ const ProfilePage = () => {
   );
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="flex flex-col md:flex-row gap-8">
-        <Sidebar />
-        <main className="flex-1">
-          {activeTab === 'details' && <ProfileDetails />}
-          {activeTab === 'orders' && <MyOrders />}
-        </main>
+    <>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="flex flex-col md:flex-row gap-8">
+          <Sidebar />
+          <main className="flex-1">
+            {activeTab === 'details' && <ProfileDetails />}
+            {activeTab === 'orders' && <MyOrders />}
+          </main>
+        </div>
       </div>
-    </div>
+      <ConfirmationModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={logOut}
+        title="Confirm Log Out"
+        message="Are you sure you want to log out of your account?"
+      />
+    </>
   );
 };
 
