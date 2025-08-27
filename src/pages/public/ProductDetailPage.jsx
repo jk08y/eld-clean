@@ -49,7 +49,7 @@ const ProductDetailPage = () => {
         <ProductImageGallery images={product.imageUrls} />
         <ProductInfo product={product} />
       </div>
-      <ProductReviews />
+      <ProductReviews productId={product.id} />
     </div>
   );
 };

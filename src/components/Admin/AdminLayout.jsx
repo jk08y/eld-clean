@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, ShoppingBag, ListOrdered, Menu, X } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, ListOrdered, Mail, Menu, X } from 'lucide-react';
 
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -9,6 +9,7 @@ const AdminLayout = () => {
     { to: '/admin', text: 'Dashboard', icon: <LayoutDashboard size={20} /> },
     { to: '/admin/products', text: 'Products', icon: <ShoppingBag size={20} /> },
     { to: '/admin/orders', text: 'Orders', icon: <ListOrdered size={20} /> },
+    { to: '/admin/subscribers', text: 'Subscribers', icon: <Mail size={20} /> },
   ];
 
   const SidebarContent = () => (
@@ -39,35 +40,25 @@ const AdminLayout = () => {
 
   return (
     <div className="relative min-h-screen md:flex">
-      {/* Overlay for mobile */}
       {isSidebarOpen && (
         <div 
           className="fixed inset-0 bg-black opacity-50 z-40 md:hidden"
           onClick={() => setIsSidebarOpen(false)}
         ></div>
       )}
-
-      {/* Sidebar */}
       <aside className={`bg-neutral text-white w-64 fixed inset-y-0 left-0 transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:relative md:translate-x-0 transition-transform duration-300 ease-in-out z-50`}>
         <SidebarContent />
       </aside>
-
-      {/* Main Content Area */}
       <div className="flex-1 flex flex-col max-h-screen overflow-y-auto">
-        {/* Mobile Header */}
         <header className="bg-white text-gray-800 flex justify-between items-center md:hidden sticky top-0 z-30 shadow-md h-16">
           <NavLink to="/admin" className="block px-4 text-primary font-bold">Eld Clean Admin</NavLink>
           <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-4 focus:outline-none focus:bg-gray-200">
             {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </header>
-
-        {/* Content */}
         <main className="flex-grow p-6 sm:p-10 bg-base-100">
-          <Outlet /> {/* Child routes will be rendered here */}
+          <Outlet />
         </main>
-
-        {/* Footer */}
         <footer className="bg-white p-4 text-center text-neutral/60 text-sm border-t border-base-300">
           &copy; {new Date().getFullYear()} Eld Clean. All Rights Reserved.
         </footer>

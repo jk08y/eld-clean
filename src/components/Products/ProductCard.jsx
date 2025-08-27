@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
+import { useCart } from '../../context/CartContext';
 
 const ProductCard = ({ product }) => {
+  const { addItemToCart } = useCart();
   const imageUrl = (product.imageUrls && product.imageUrls[0]) || 'https://placehold.co/400x400/F1F5F9/374151?text=Eld+Clean';
 
   return (
@@ -37,7 +39,10 @@ const ProductCard = ({ product }) => {
         </div>
       </Link>
       <div className="px-4 pb-4">
-        <button className="w-full bg-secondary text-white font-bold py-2 px-4 rounded-full flex items-center justify-center space-x-2 hover:bg-secondary/90 transition-colors duration-300 transform hover:scale-105">
+        <button 
+          onClick={() => addItemToCart(product)}
+          className="w-full bg-secondary text-white font-bold py-2 px-4 rounded-full flex items-center justify-center space-x-2 hover:bg-secondary/90 transition-colors duration-300 transform hover:scale-105"
+        >
           <ShoppingCart size={18} />
           <span>Add to Cart</span>
         </button>

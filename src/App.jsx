@@ -4,6 +4,7 @@ import Layout from './components/Layout/Layout';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 import AdminRoute from './components/Auth/AdminRoute';
 import AdminLayout from './components/Admin/AdminLayout';
+import ScrollToTop from './components/Layout/ScrollToTop';
 
 // Page Imports
 import HomePage from './pages/public/HomePage';
@@ -23,10 +24,11 @@ import OrderConfirmationPage from './pages/checkout/OrderConfirmationPage';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import AdminProducts from './pages/Admin/AdminProducts';
 import AdminOrders from './pages/Admin/AdminOrders';
+import AdminSubscribers from './pages/Admin/AdminSubscribers';
 
-// Component to handle the main layout for non-admin pages
 const MainLayout = () => (
   <Layout>
+    <ScrollToTop />
     <Outlet />
   </Layout>
 );
@@ -34,14 +36,13 @@ const MainLayout = () => (
 function App() {
   return (
     <Routes>
-      {/* Admin Routes with AdminLayout */}
       <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
         <Route index element={<AdminDashboard />} />
         <Route path="products" element={<AdminProducts />} />
         <Route path="orders" element={<AdminOrders />} />
+        <Route path="subscribers" element={<AdminSubscribers />} />
       </Route>
 
-      {/* Public and User Routes with MainLayout */}
       <Route path="/" element={<MainLayout />}>
         <Route index element={<HomePage />} />
         <Route path="products" element={<ProductsPage />} />

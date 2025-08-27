@@ -1,11 +1,20 @@
 import React, { useState } from 'react';
 import { ShoppingCart, Minus, Plus } from 'lucide-react';
+import { useCart } from '../../context/CartContext';
 
 const ProductInfo = ({ product }) => {
   const [quantity, setQuantity] = useState(1);
+  const { addItemToCart } = useCart();
 
   const handleQuantityChange = (amount) => {
     setQuantity(prev => Math.max(1, prev + amount));
+  };
+
+  const handleAddToCart = () => {
+    // This logic would be expanded to handle adding a specific quantity
+    for (let i = 0; i < quantity; i++) {
+      addItemToCart(product);
+    }
   };
 
   return (
@@ -35,7 +44,10 @@ const ProductInfo = ({ product }) => {
         </div>
       </div>
       
-      <button className="w-full sm:w-auto bg-primary text-white font-bold py-3 px-8 rounded-full flex items-center justify-center space-x-2 hover:bg-primary/90 transition-colors duration-300 transform hover:scale-105 shadow-lg">
+      <button 
+        onClick={handleAddToCart}
+        className="w-full sm:w-auto bg-primary text-white font-bold py-3 px-8 rounded-full flex items-center justify-center space-x-2 hover:bg-primary/90 transition-colors duration-300 transform hover:scale-105 shadow-lg"
+      >
         <ShoppingCart size={20} />
         <span>Add to Cart</span>
       </button>
