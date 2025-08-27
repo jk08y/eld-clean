@@ -1,28 +1,43 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-
-// Mock data for now; this will come from Firebase later.
-const mockOrders = [
-  { id: 'ORD-123XYZ', date: '2024-08-26', total: 1950, status: 'Shipped' },
-  { id: 'ORD-456ABC', date: '2024-08-20', total: 850, status: 'Delivered' },
-  { id: 'ORD-789DEF', date: '2024-08-15', total: 3200, status: 'Delivered' },
-  { id: 'ORD-999GHI', date: '2024-08-12', total: 500, status: 'Processing' },
-];
+import { useAuth } from '../../context/AuthContext';
+import { getOrdersByUserId } from '../../firebase/orderService';
+import toast from 'react-hot-toast';
 
 const OrdersPage = () => {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { currentUser } = useAuth();
+
+  const fetchUserOrders = useCallback(async () => {
+    if (!currentUser) return;
+    setLoading(true);
+    try {
+      const userOrders = await getOrdersByUserId(currentUser.uid);
+      setOrders(userOrders);
+    } catch (error) {
+      toast.error("Failed to fetch your orders.");
+      console.error(error);
+    }
+    setLoading(false);
+  }, [currentUser]);
+
+  useEffect(() => {
+    fetchUserOrders();
+  }, [fetchUserOrders]);
 
   const getStatusBadge = (status) => {
     switch (status) {
-      case 'Shipped':
-        return 'bg-blue-100 text-blue-800';
-      case 'Delivered':
-        return 'bg-green-100 text-green-800';
-      case 'Processing':
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+      case 'Shipped': return 'bg-blue-100 text-blue-800';
+      case 'Delivered': return 'bg-green-100 text-green-800';
+      case 'Processing': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
+
+  if (loading) {
+    return <div className="text-center py-20">Loading your orders...</div>;
+  }
 
   return (
     <div>
@@ -32,14 +47,14 @@ const OrdersPage = () => {
       </div>
       
       <div className="max-w-4xl mx-auto">
-        {mockOrders.length > 0 ? (
+        {orders.length > 0 ? (
           <div className="space-y-6">
-            {mockOrders.map(order => (
+            {orders.map(order => (
               <div key={order.id} className="bg-white p-6 rounded-lg shadow-md border border-base-300">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
                   <div>
-                    <h3 className="text-lg font-bold text-primary">Order #{order.id}</h3>
-                    <p className="text-sm text-neutral/60 mt-1">Placed on: {order.date}</p>
+                    <h3 className="text-lg font-bold text-primary">Order #{order.id.slice(0, 8)}...</h3>
+                    <p className="text-sm text-neutral/60 mt-1">Placed on: {new Date(order.createdAt?.seconds * 1000).toLocaleDateString()}</p>
                   </div>
                   <span className={`mt-4 sm:mt-0 px-3 py-1 text-sm font-semibold rounded-full ${getStatusBadge(order.status)}`}>
                     {order.status}
