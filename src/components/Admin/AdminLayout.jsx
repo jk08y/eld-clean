@@ -1,66 +1,68 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, ShoppingBag, ListOrdered, Mail, Menu, X } from 'lucide-react';
+import { BarChart2, ShoppingCart, Package, Users, Mail, Menu, X, Tag } from 'lucide-react';
 
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const navLinks = [
-    { to: '/admin', text: 'Dashboard', icon: <LayoutDashboard size={20} /> },
-    { to: '/admin/products', text: 'Products', icon: <ShoppingBag size={20} /> },
-    { to: '/admin/orders', text: 'Orders', icon: <ListOrdered size={20} /> },
-    { to: '/admin/subscribers', text: 'Subscribers', icon: <Mail size={20} /> },
+    { to: "/admin", icon: BarChart2, text: "Dashboard" },
+    { to: "/admin/products", icon: Package, text: "Products" },
+    { to: "/admin/categories", icon: Tag, text: "Categories" },
+    { to: "/admin/orders", icon: ShoppingCart, text: "Orders" },
+    { to: "/admin/subscribers", icon: Mail, text: "Subscribers" },
   ];
 
-  const SidebarContent = () => (
-    <div className="flex flex-col h-full">
-      <div className="p-6">
-        <h2 className="text-2xl font-bold text-white">Admin Panel</h2>
-      </div>
-      <nav className="mt-6 flex-1">
-        {navLinks.map(link => (
-          <NavLink
-            key={link.to}
-            to={link.to}
-            end={link.to === '/admin'}
-            onClick={() => isSidebarOpen && setIsSidebarOpen(false)}
-            className={({ isActive }) =>
-              `flex items-center px-6 py-3 transition-colors duration-200 ${
-                isActive ? 'bg-primary text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-              }`
-            }
-          >
-            {link.icon}
-            <span className="ml-4">{link.text}</span>
-          </NavLink>
-        ))}
-      </nav>
-    </div>
-  );
+  const commonLinkClasses = "flex items-center space-x-3 px-4 py-3 transition-colors duration-200 rounded-lg";
+  const activeLinkClasses = "bg-primary text-white font-bold";
+  const inactiveLinkClasses = "text-neutral/80 hover:bg-base-200";
 
   return (
-    <div className="relative min-h-screen md:flex">
+    <div className="flex h-screen bg-base-100">
+      {/* Mobile Overlay */}
       {isSidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black opacity-50 z-40 md:hidden"
+          className="fixed inset-0 bg-black/50 z-20 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         ></div>
       )}
-      <aside className={`bg-neutral text-white w-64 fixed inset-y-0 left-0 transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:relative md:translate-x-0 transition-transform duration-300 ease-in-out z-50`}>
-        <SidebarContent />
+
+      {/* Sidebar */}
+      <aside className={`fixed lg:relative inset-y-0 left-0 bg-white w-64 transform transition-transform duration-300 ease-in-out z-30 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} border-r border-base-200 flex flex-col`}>
+        <div className="p-6 text-2xl font-bold text-primary border-b">
+          Eld Clean Admin
+        </div>
+        <nav className="flex-grow p-4 space-y-2">
+          {navLinks.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              end={link.to === "/admin"}
+              onClick={() => setIsSidebarOpen(false)}
+              className={({ isActive }) => `${commonLinkClasses} ${isActive ? activeLinkClasses : inactiveLinkClasses}`}
+            >
+              <link.icon size={22} />
+              <span>{link.text}</span>
+            </NavLink>
+          ))}
+        </nav>
       </aside>
-      <div className="flex-1 flex flex-col max-h-screen overflow-y-auto">
-        <header className="bg-white text-gray-800 flex justify-between items-center md:hidden sticky top-0 z-30 shadow-md h-16">
-          <NavLink to="/admin" className="block px-4 text-primary font-bold">Eld Clean Admin</NavLink>
-          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-4 focus:outline-none focus:bg-gray-200">
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <header className="flex justify-between items-center p-4 bg-white shadow-sm lg:hidden">
+          <h1 className="text-xl font-bold text-primary">Eld Clean Admin</h1>
+          <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-neutral">
             {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </header>
-        <main className="flex-grow p-6 sm:p-10 bg-base-100">
+
+        <main className="flex-1 overflow-y-auto p-6 md:p-8">
           <Outlet />
         </main>
-        <footer className="bg-white p-4 text-center text-neutral/60 text-sm border-t border-base-300">
-          &copy; {new Date().getFullYear()} Eld Clean. All Rights Reserved.
+
+        <footer className="bg-white p-4 text-center text-sm text-neutral/60 border-t">
+            © {new Date().getFullYear()} Eld Clean. All rights reserved.
         </footer>
       </div>
     </div>

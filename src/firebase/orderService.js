@@ -1,60 +1,71 @@
 import { db } from './config';
-import { collection, getDocs, doc, updateDoc, query, where, addDoc, serverTimestamp, getDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, serverTimestamp, doc, updateDoc, getDoc, limit } from 'firebase/firestore';
 
-const ordersCollectionRef = collection(db, 'orders');
+export const getAllOrders = async () => {
+  const ordersCollectionRef = collection(db, 'orders');
+  const data = await getDocs(ordersCollectionRef);
+  return data.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+};
 
-export const createOrder = async (orderData) => {
-  // Create an array of just the product IDs for easier querying later
-  const productIds = orderData.items.map(item => item.productId);
-  
-  const orderRef = await addDoc(ordersCollectionRef, {
-    ...orderData,
-    productIds,
-    status: 'Processing',
-    createdAt: serverTimestamp(),
-  });
+export const getOrdersByUserId = async (userId) => {
+  const ordersCollectionRef = collection(db, 'orders');
+  const q = query(ordersCollectionRef, where("userId", "==", userId));
+  const data = await getDocs(q);
+  return data.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+};
 
-  // After order is created, save shipping address to user profile if it doesn't exist
-  const userDocRef = doc(db, 'users', orderData.userId);
-  const userDoc = await getDoc(userDocRef);
-  if (userDoc.exists() && !userDoc.data().shippingAddress) {
-    await updateDoc(userDocRef, {
-      shippingAddress: orderData.shippingAddress
+export const createOrder = async (userId, orderData, cartItems) => {
+  const userRef = doc(db, 'users', userId);
+  const userSnap = await getDoc(userRef);
+
+  if (userSnap.exists() && !userSnap.data().shippingAddress) {
+    await updateDoc(userRef, {
+      shippingAddress: {
+        fullName: orderData.shippingAddress.fullName,
+        streetAddress: orderData.shippingAddress.streetAddress,
+        city: orderData.shippingAddress.city,
+        county: orderData.shippingAddress.county,
+      }
     });
   }
 
-  return orderRef;
+  const productIds = cartItems.map(item => item.productId || item.id);
+
+  const newOrderRef = await addDoc(collection(db, 'orders'), {
+    userId,
+    ...orderData,
+    items: cartItems,
+    productIds,
+    createdAt: serverTimestamp(),
+    status: 'Processing',
+  });
+  return newOrderRef.id;
+};
+
+export const getOrderById = async (orderId) => {
+  const orderRef = doc(db, 'orders', orderId);
+  const orderSnap = await getDoc(orderRef);
+  if (orderSnap.exists()) {
+    return { ...orderSnap.data(), id: orderSnap.id };
+  } else {
+    throw new Error("Order not found");
+  }
 };
 
 export const checkIfUserPurchasedProduct = async (userId, productId) => {
-  if (!userId || !productId) return false;
+  const ordersRef = collection(db, 'orders');
   const q = query(
-    ordersCollectionRef, 
-    where("userId", "==", userId), 
-    where("productIds", "array-contains", productId),
+    ordersRef,
+    where('userId', '==', userId),
+    where('productIds', 'array-contains', productId),
     limit(1)
   );
   const querySnapshot = await getDocs(q);
   return !querySnapshot.empty;
 };
 
-export const getOrderById = async (orderId) => {
-  const orderDoc = doc(db, 'orders', orderId);
-  return await getDoc(orderDoc);
+export const updateOrderStatus = async (orderId, status) => {
+  const orderRef = doc(db, 'orders', orderId);
+  return await updateDoc(orderRef, { status });
 };
 
-export const getAllOrders = async () => {
-  const data = await getDocs(ordersCollectionRef);
-  return data.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-};
-
-export const getOrdersByUserId = async (userId) => {
-  const q = query(ordersCollectionRef, where("userId", "==", userId));
-  const data = await getDocs(q);
-  return data.docs.map(doc => ({ ...doc.data(), id: doc.id }));
-};
-
-export const updateOrderStatus = async (orderId, newStatus) => {
-  const orderDoc = doc(db, 'orders', orderId);
-  return await updateDoc(orderDoc, { status: newStatus });
-};

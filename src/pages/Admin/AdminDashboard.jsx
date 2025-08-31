@@ -1,9 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, ShoppingCart, Users, Eye } from 'lucide-react';
+import { ShoppingCart, DollarSign, Users, Activity } from 'lucide-react';
 import { getAllOrders } from '../../firebase/orderService';
-import { getDocs, collection } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase/config';
-import { Link } from 'react-router-dom';
+
+const StatCard = ({ title, value, icon, color }) => {
+  const Icon = icon;
+  return (
+    <div className="bg-white p-6 rounded-lg shadow-md border border-base-200 flex items-center space-x-4">
+      <div className={`p-3 rounded-full ${color}`}>
+        <Icon className="text-white" size={24} />
+      </div>
+      <div>
+        <p className="text-sm text-neutral/60 font-medium">{title}</p>
+        <p className="text-2xl font-bold text-neutral">{value}</p>
+      </div>
+    </div>
+  );
+};
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -17,21 +31,20 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [ordersData, usersSnapshot] = await Promise.all([
-          getAllOrders(),
-          getDocs(collection(db, 'users'))
-        ]);
-
-        const totalRevenue = ordersData.reduce((sum, order) => sum + order.total, 0);
-        const totalOrders = ordersData.length;
-        const totalCustomers = usersSnapshot.size;
-
-        setStats({ totalRevenue, totalOrders, totalCustomers });
+        // Fetch all orders for revenue and order count
+        const orders = await getAllOrders();
+        const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
+        setStats(prev => ({ ...prev, totalRevenue, totalOrders: orders.length }));
         
         // Sort orders by date and get the 5 most recent
-        const sortedOrders = ordersData.sort((a, b) => b.createdAt.seconds - a.createdAt.seconds);
+        const sortedOrders = orders.sort((a, b) => b.createdAt?.seconds - a.createdAt?.seconds);
         setRecentOrders(sortedOrders.slice(0, 5));
 
+        // Fetch all users for customer count
+        const usersSnapshot = await getDocs(collection(db, 'users'));
+        const uniqueCustomers = new Set(orders.map(order => order.userId));
+        setStats(prev => ({ ...prev, totalCustomers: uniqueCustomers.size }));
+        
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
       }
@@ -40,12 +53,6 @@ const AdminDashboard = () => {
 
     fetchData();
   }, []);
-
-  const statCards = [
-    { title: 'Total Revenue', value: `Ksh ${stats.totalRevenue.toLocaleString()}`, icon: <DollarSign className="h-8 w-8 text-green-500" /> },
-    { title: 'Total Orders', value: stats.totalOrders, icon: <ShoppingCart className="h-8 w-8 text-blue-500" /> },
-    { title: 'Total Customers', value: stats.totalCustomers, icon: <Users className="h-8 w-8 text-purple-500" /> },
-  ];
   
   const getStatusBadge = (status) => {
     switch (status) {
@@ -56,63 +63,67 @@ const AdminDashboard = () => {
     }
   };
 
+  if (loading) {
+    return <div>Loading dashboard...</div>;
+  }
+
   return (
     <div>
       <h1 className="text-3xl font-bold text-neutral mb-6">Dashboard</h1>
       
-      {loading ? (
-        <p>Loading dashboard...</p>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {statCards.map(stat => (
-              <div key={stat.title} className="bg-white p-6 rounded-lg shadow-md border border-base-300 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-neutral/70">{stat.title}</p>
-                  <p className="text-2xl font-bold text-neutral mt-1">{stat.value}</p>
-                </div>
-                {stat.icon}
-              </div>
-            ))}
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <StatCard 
+          title="Total Revenue" 
+          value={`Ksh ${stats.totalRevenue.toLocaleString()}`} 
+          icon={DollarSign}
+          color="bg-green-500"
+        />
+        <StatCard 
+          title="Total Orders" 
+          value={stats.totalOrders} 
+          icon={ShoppingCart}
+          color="bg-blue-500"
+        />
+        <StatCard 
+          title="Total Customers" 
+          value={stats.totalCustomers} 
+          icon={Users}
+          color="bg-purple-500"
+        />
+      </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-md border border-base-300">
-            <h2 className="text-xl font-bold text-neutral mb-4">Recent Orders</h2>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b border-base-300 bg-base-100/50">
-                    <th className="p-4 font-semibold">Order ID</th>
-                    <th className="p-4 font-semibold hidden sm:table-cell">Customer</th>
-                    <th className="p-4 font-semibold hidden md:table-cell">Total</th>
-                    <th className="p-4 font-semibold">Status</th>
-                    <th className="p-4 font-semibold"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentOrders.map(order => (
-                    <tr key={order.id} className="border-b border-base-200 last:border-b-0 hover:bg-base-100/50">
-                      <td className="p-4 font-medium text-primary">#{order.id.slice(0, 8)}...</td>
-                      <td className="p-4 text-neutral/80 hidden sm:table-cell">{order.shippingAddress?.fullName || 'N/A'}</td>
-                      <td className="p-4 text-neutral/80 hidden md:table-cell">Ksh {order.total}</td>
-                      <td className="p-4">
-                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(order.status)}`}>
-                          {order.status}
-                        </span>
-                      </td>
-                      <td className="p-4 text-right">
-                        <Link to={`/admin/orders`} className="text-secondary hover:text-secondary/80 p-2">
-                          <Eye size={18} />
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </>
-      )}
+      <div className="bg-white p-6 rounded-lg shadow-md border border-base-200">
+        <h2 className="text-xl font-bold text-neutral mb-4 flex items-center space-x-2">
+          <Activity size={22} />
+          <span>Recent Orders</span>
+        </h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b">
+                <th className="py-2 px-4 font-semibold">Order ID</th>
+                <th className="py-2 px-4 font-semibold">Date</th>
+                <th className="py-2 px-4 font-semibold">Total</th>
+                <th className="py-2 px-4 font-semibold">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recentOrders.map(order => (
+                <tr key={order.id} className="border-b hover:bg-gray-50">
+                  <td className="py-3 px-4 text-primary font-medium">#{order.id.slice(0, 8)}...</td>
+                  <td className="py-3 px-4 text-neutral/80">{new Date(order.createdAt?.seconds * 1000).toLocaleDateString()}</td>
+                  <td className="py-3 px-4 text-neutral/80">Ksh {order.total.toLocaleString()}</td>
+                  <td className="py-3 px-4">
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(order.status)}`}>
+                      {order.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };
