@@ -5,7 +5,7 @@ import { Image as ImageIcon } from 'lucide-react';
 const CategoryCard = ({ category }) => {
   return (
     <Link to={`/products?category=${encodeURIComponent(category.name)}`} className="group block overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-      <div className="relative pt-[100%]"> {/* 1:1 Aspect Ratio */}
+      <div className="relative pt-[100%]"> {/* 1:1 Aspect Ratio sq*/}
         {category.imageUrl ? (
           <img
             src={category.imageUrl}
@@ -27,4 +27,5 @@ const CategoryCard = ({ category }) => {
 };
 
 export default CategoryCard;
+
 
