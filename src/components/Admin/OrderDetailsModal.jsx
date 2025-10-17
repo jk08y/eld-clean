@@ -74,9 +74,9 @@ const OrderDetailsModal = ({ isOpen, onClose, order, onStatusUpdate }) => {
           </div>
 
           <div className="flex-grow overflow-y-auto p-6 space-y-6 printable-area">
-            {/* Invoice Header */}
+            {/* Invoice Header (Branding Update) */}
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-primary">Eld Clean</h1>
+              <h1 className="text-3xl font-bold text-primary">Cleaning Products</h1>
               <p className="text-lg font-semibold text-neutral">Invoice</p>
               <p className="text-neutral/70">Order ID: #{order.id.substring(0, 8)}</p>
             </div>
@@ -165,4 +165,3 @@ const OrderDetailsModal = ({ isOpen, onClose, order, onStatusUpdate }) => {
 };
 
 export default OrderDetailsModal;
-

@@ -1,3 +1,4 @@
+// src/context/AuthContext.jsx
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
   createUserWithEmailAndPassword,
@@ -17,6 +18,24 @@ export const useAuth = () => {
   return useContext(AuthContext);
 };
 
+// CRITICAL FIX: Parse VITE_ADMIN_EMAILS once and clean the values.
+const ADMIN_EMAILS = import.meta.env.VITE_ADMIN_EMAILS
+  .replace(/'/g, '') // Remove single quotes
+  .split(',')
+  .map(email => email.trim().toLowerCase()); // Trim whitespace and convert to lowercase
+
+const isEmailInAdminList = (email) => {
+  if (!email) return false;
+  return ADMIN_EMAILS.includes(email.toLowerCase());
+};
+
+// Helper function to remove undefined/null values for Firestore updates
+const cleanData = (data) => {
+  return Object.fromEntries(
+    Object.entries(data).filter(([_, v]) => v !== null && v !== undefined)
+  );
+};
+
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -24,12 +43,17 @@ export const AuthProvider = ({ children }) => {
   const signUp = async (email, password, fullName) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
-    await setDoc(doc(db, 'users', user.uid), {
+    
+    const userData = {
       uid: user.uid,
       fullName,
       email,
-      isAdmin: import.meta.env.VITE_ADMIN_EMAILS.split(',').includes(email),
-    });
+      isProfileComplete: false, 
+      // Use the robust check
+      isAdmin: isEmailInAdminList(email),
+    };
+
+    await setDoc(doc(db, 'users', user.uid), userData);
     return userCredential;
   };
 
@@ -37,9 +61,25 @@ export const AuthProvider = ({ children }) => {
     return signInWithEmailAndPassword(auth, email, password);
   };
 
-  const googleSignIn = () => {
+  const googleSignIn = async () => {
     const provider = new GoogleAuthProvider();
-    return signInWithPopup(auth, provider);
+    const userCredential = await signInWithPopup(auth, provider);
+    const user = userCredential.user;
+    const userDocRef = doc(db, 'users', user.uid);
+    const userDoc = await getDoc(userDocRef);
+
+    if (!userDoc.exists()) {
+      const userData = {
+        uid: user.uid,
+        fullName: user.displayName || 'New User',
+        email: user.email,
+        isProfileComplete: false,
+        // Use the robust check
+        isAdmin: isEmailInAdminList(user.email),
+      };
+      await setDoc(userDocRef, userData);
+    }
+    return userCredential;
   };
 
   const logOut = () => {
@@ -52,25 +92,53 @@ export const AuthProvider = ({ children }) => {
 
   const updateUserProfile = async (uid, data) => {
     const userDocRef = doc(db, 'users', uid);
-    await updateDoc(userDocRef, data);
-    // Update the local state to reflect changes immediately
-    setCurrentUser(prevUser => ({ ...prevUser, ...data }));
+    const cleanedData = cleanData(data);
+    
+    if (Object.keys(cleanedData).length > 0) {
+      await updateDoc(userDocRef, cleanedData);
+      
+      setCurrentUser(prevUser => ({ 
+        ...prevUser, 
+        ...cleanedData 
+      }));
+    }
   };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setLoading(true);
+
       if (user) {
         const userDocRef = doc(db, 'users', user.uid);
         const userDoc = await getDoc(userDocRef);
+        
+        let userData = {
+            uid: user.uid,
+            email: user.email,
+            fullName: user.displayName || user.email,
+        };
+
         if (userDoc.exists()) {
-          setCurrentUser({ ...user, ...userDoc.data() });
+          userData = {
+            ...userData,
+            ...userDoc.data(),
+          };
         } else {
-          setCurrentUser(user);
+          // If the user doc doesn't exist (shouldn't happen for email/password but possible for old Google sign-ins)
+          // We set isAdmin based on the robust email check as a fallback.
+          userData.isAdmin = isEmailInAdminList(user.email);
         }
+        
+        // Ensure critical flags are always present, defaulting if missing
+        userData.isProfileComplete = userData.isProfileComplete ?? false;
+        userData.isAdmin = userData.isAdmin ?? false;
+
+        setCurrentUser(userData);
+
       } else {
         setCurrentUser(null);
       }
-      setLoading(false);
+      setLoading(false); 
     });
 
     return unsubscribe;
@@ -83,7 +151,8 @@ export const AuthProvider = ({ children }) => {
     googleSignIn,
     logOut,
     passwordReset,
-    updateUserProfile, // Expose the new function
+    updateUserProfile,
+    loading,
   };
 
   return (

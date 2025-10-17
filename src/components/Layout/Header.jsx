@@ -1,6 +1,7 @@
+// src/components/Layout/Header.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { ShoppingCart, User, Search, Menu, X } from 'lucide-react';
+import { ShoppingCart, User, Search, Menu, X, Home, Package, Info, Mail } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 
@@ -11,10 +12,10 @@ const Header = () => {
   const { currentUser } = useAuth();
 
   const navLinks = [
-    { href: '/', label: 'Home' },
-    { href: '/products', label: 'Products' },
-    { href: '/about', label: 'About Us' },
-    { href: '/contact', label: 'Contact' },
+    { href: '/', label: 'Home', icon: Home },
+    { href: '/products', label: 'Products', icon: Package },
+    { href: '/about', label: 'About Us', icon: Info },
+    { href: '/contact', label: 'Contact', icon: Mail },
   ];
 
   // Effect to handle scroll state for header styling
@@ -47,18 +48,19 @@ const Header = () => {
           <div className="flex items-center justify-between h-20">
             <div className="flex-shrink-0">
               <Link to="/" className="text-2xl font-bold text-primary">
-                Eld Clean
+                Cleaning Products
               </Link>
             </div>
 
+            {/* Desktop Navigation */}
             <nav className="hidden md:flex md:items-center md:space-x-8">
               {navLinks.map((link) => (
                 <NavLink
                   key={link.href}
                   to={link.href}
                   className={({ isActive }) =>
-                    `relative text-base font-medium text-neutral transition-colors duration-200 after:absolute after:bottom-[-4px] after:left-0 after:h-[2px] after:w-full after:bg-primary after:transition-transform after:duration-300 ${
-                      isActive ? 'text-primary after:scale-x-100' : 'hover:text-primary after:scale-x-0 hover:after:scale-x-100'
+                    `relative text-base font-medium text-neutral transition-colors duration-200 after:absolute after:bottom-[-4px] after:left-0 after:h-[3px] after:w-full after:bg-primary after:transition-transform after:duration-300 ${
+                      isActive ? 'text-primary after:scale-x-100 font-semibold' : 'hover:text-primary after:scale-x-0 hover:after:scale-x-100'
                     }`
                   }
                 >
@@ -67,29 +69,28 @@ const Header = () => {
               ))}
             </nav>
 
+            {/* Icons / Actions */}
             <div className="flex items-center space-x-4">
-              <button className="hidden sm:block text-neutral hover:text-primary transition-colors duration-200">
+              {/* Desktop Search Icon links to Products Page */}
+              <Link to="/products" className="hidden sm:block text-neutral hover:text-primary transition-colors duration-200" aria-label="Search">
                 <Search size={22} />
-              </button>
-              <Link to={currentUser ? "/profile" : "/login"} className="text-neutral hover:text-primary transition-colors duration-200">
+              </Link>
+              <Link to={currentUser ? "/profile" : "/login"} className="text-neutral hover:text-primary transition-colors duration-200" aria-label={currentUser ? "User Profile" : "Login/Register"}>
                 <User size={22} />
               </Link>
-              <Link to="/cart" className="relative text-neutral hover:text-primary transition-colors duration-200">
+              <Link to="/cart" className="relative text-neutral hover:text-primary transition-colors duration-200" aria-label="Shopping Cart">
                 <ShoppingCart size={22} />
                 {cartCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-secondary text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                  <span className="absolute -top-2 -right-2 bg-accent text-neutral text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-white">
                     {cartCount}
                   </span>
                 )}
               </Link>
-              {!currentUser && (
-                 <Link to="/login" className="hidden lg:block bg-primary text-white font-bold py-2 px-4 rounded-full text-sm hover:bg-primary/90 transition-colors">
-                    Login
-                 </Link>
-              )}
+              {/* Mobile Menu Toggle (remains) */}
               <button
                 className="md:hidden text-neutral hover:text-primary"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label="Toggle mobile menu"
               >
                 <Menu size={26} />
               </button>
@@ -98,35 +99,53 @@ const Header = () => {
         </div>
       </header>
       
-      {/* Mobile Menu */}
+      {/* Mobile Menu Sidebar */}
       <div 
         className={`fixed inset-0 z-40 transition-opacity duration-300 md:hidden ${isMenuOpen ? 'bg-black/60 opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setIsMenuOpen(false)}
+        aria-hidden={!isMenuOpen}
       ></div>
-      <div className={`fixed top-0 right-0 h-full w-4/5 max-w-sm bg-white z-50 transform transition-transform duration-300 ease-in-out md:hidden ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-        <div className="flex justify-end p-4">
+      <div className={`fixed top-0 right-0 h-full w-4/5 max-w-xs bg-white z-50 transform transition-transform duration-300 ease-in-out md:hidden ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'} shadow-xl`}>
+        <div className="flex justify-between items-center p-4 border-b">
+            <h3 className="text-lg font-bold text-neutral">More Links</h3>
             <button
                 onClick={() => setIsMenuOpen(false)}
-                className="text-neutral hover:text-primary"
+                className="text-neutral hover:text-primary p-2"
+                aria-label="Close menu"
             >
-                <X size={28} />
+                <X size={24} />
             </button>
         </div>
-        <nav className="flex flex-col items-center space-y-8 mt-10">
+        <nav className="flex flex-col p-4 space-y-2">
           {navLinks.map((link) => (
             <NavLink
               key={link.href}
               to={link.href}
               onClick={() => setIsMenuOpen(false)}
               className={({ isActive }) =>
-                `text-2xl font-semibold transition-colors duration-200 ${
-                  isActive ? 'text-primary' : 'text-neutral hover:text-primary'
+                `flex items-center space-x-4 p-3 rounded-lg font-medium transition-colors ${
+                  isActive ? 'bg-primary/10 text-primary font-semibold' : 'text-neutral hover:bg-base-200'
                 }`
               }
             >
-              {link.label}
+              <link.icon size={22} /> {/* Use specific icon here */}
+              <span>{link.label}</span>
             </NavLink>
           ))}
+          <div className="pt-4 border-t border-base-200">
+            <Link 
+              to={currentUser ? "/profile" : "/login"}
+              onClick={() => setIsMenuOpen(false)}
+              className={`w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-full font-bold transition-colors shadow-md ${
+                currentUser 
+                  ? 'bg-secondary text-white hover:bg-secondary/90' 
+                  : 'bg-primary text-white hover:bg-primary/90'
+              }`}
+            >
+              <User size={20} />
+              <span>{currentUser ? "My Account" : "Login / Register"}</span>
+            </Link>
+          </div>
         </nav>
       </div>
     </>

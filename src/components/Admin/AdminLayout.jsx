@@ -14,6 +14,7 @@ const AdminLayout = () => {
   ];
 
   const commonLinkClasses = "flex items-center space-x-3 px-4 py-3 transition-colors duration-200 rounded-lg";
+  // Updated colors to match the new primary/base scheme
   const activeLinkClasses = "bg-primary text-white font-bold";
   const inactiveLinkClasses = "text-neutral/80 hover:bg-base-200";
 
@@ -29,8 +30,9 @@ const AdminLayout = () => {
 
       {/* Sidebar */}
       <aside className={`fixed lg:relative inset-y-0 left-0 bg-white w-64 transform transition-transform duration-300 ease-in-out z-30 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} border-r border-base-200 flex flex-col`}>
-        <div className="p-6 text-2xl font-bold text-primary border-b">
-          Eld Clean Admin
+        {/* Branding Update */}
+        <div className="p-6 text-xl font-bold text-primary border-b">
+          Cleaning Products Admin
         </div>
         <nav className="flex-grow p-4 space-y-2">
           {navLinks.map((link) => (
@@ -51,7 +53,8 @@ const AdminLayout = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="flex justify-between items-center p-4 bg-white shadow-sm lg:hidden">
-          <h1 className="text-xl font-bold text-primary">Eld Clean Admin</h1>
+          {/* Branding Update */}
+          <h1 className="text-xl font-bold text-primary">Cleaning Products Admin</h1>
           <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-neutral">
             {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -62,7 +65,8 @@ const AdminLayout = () => {
         </main>
 
         <footer className="bg-white p-4 text-center text-sm text-neutral/60 border-t">
-            © {new Date().getFullYear()} Eld Clean. All rights reserved.
+            {/* Branding Update */}
+            © {new Date().getFullYear()} Cleaning Products. All rights reserved.
         </footer>
       </div>
     </div>

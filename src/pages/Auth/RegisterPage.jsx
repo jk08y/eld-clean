@@ -1,3 +1,4 @@
+// src/pages/Auth/RegisterPage.jsx
 import React, { useState } from 'react';
 import AuthLayout from '../../components/Auth/AuthLayout';
 import { Eye, EyeOff } from 'lucide-react';
@@ -32,53 +33,49 @@ const RegisterPage = () => {
 
   return (
     <AuthLayout
-      title="Create a new account"
-      subtitle="Already have an account?"
+      title="Create Your Account"
+      subtitle="Already a customer?"
       linkTo="/login"
       linkText="Sign in"
     >
-      <form className="space-y-6" onSubmit={handleSubmit}>
+      <form className="space-y-5" onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="fullName" className="block text-sm font-medium text-neutral">
+          <label htmlFor="fullName" className="block text-sm font-semibold text-neutral mb-1">
             Full Name
           </label>
-          <div className="mt-1">
-            <input
-              id="fullName"
-              name="fullName"
-              type="text"
-              autoComplete="name"
-              required
-              placeholder="Jane Doe"
-              onChange={handleChange}
-              className="w-full border border-base-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
+          <input
+            id="fullName"
+            name="fullName"
+            type="text"
+            autoComplete="name"
+            required
+            placeholder="Jane Doe"
+            onChange={handleChange}
+            className="w-full border border-base-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary transition-shadow"
+          />
         </div>
         
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-neutral">
+          <label htmlFor="email" className="block text-sm font-semibold text-neutral mb-1">
             Email address
           </label>
-          <div className="mt-1">
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              placeholder="you@example.com"
-              onChange={handleChange}
-              className="w-full border border-base-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            placeholder="you@example.com"
+            onChange={handleChange}
+            className="w-full border border-base-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary transition-shadow"
+          />
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-neutral">
+          <label htmlFor="password" className="block text-sm font-semibold text-neutral mb-1">
             Password
           </label>
-          <div className="mt-1 relative">
+          <div className="relative">
             <input
               id="password"
               name="password"
@@ -87,12 +84,13 @@ const RegisterPage = () => {
               required
               placeholder="••••••••"
               onChange={handleChange}
-              className="w-full border border-base-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full border border-base-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary transition-shadow"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-neutral/60 hover:text-primary"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-neutral/60 hover:text-primary transition-colors"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -103,7 +101,7 @@ const RegisterPage = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors disabled:bg-primary/50"
+            className="w-full flex justify-center py-3 px-4 rounded-full shadow-lg text-lg font-bold text-white bg-primary hover:bg-primary/90 transition-colors disabled:bg-primary/50 mt-4"
           >
             {loading ? 'Creating Account...' : 'Create Account'}
           </button>

@@ -1,3 +1,4 @@
+// src/components/Checkout/ShippingForm.jsx
 import React from 'react';
 
 const ShippingForm = ({ shippingData, setShippingData }) => {
@@ -7,7 +8,7 @@ const ShippingForm = ({ shippingData, setShippingData }) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm border border-base-300">
+    <div className="bg-white p-6 rounded-xl shadow-lg border border-base-300">
       <h2 className="text-xl font-bold text-neutral mb-4">Shipping Information</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="sm:col-span-2">
@@ -16,6 +17,7 @@ const ShippingForm = ({ shippingData, setShippingData }) => {
         </div>
         <div className="sm:col-span-2">
           <label htmlFor="address" className="block text-sm font-medium text-neutral">Street Address</label>
+          {/* Note: 'address' maps to 'streetAddress' in the service/DB */}
           <input type="text" name="address" id="address" value={shippingData.address} onChange={handleChange} required className="mt-1 w-full border border-base-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary" />
         </div>
         <div>
